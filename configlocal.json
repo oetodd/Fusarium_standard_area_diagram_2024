@@ -1,0 +1,42 @@
+{
+    "input_dir": "/Users/oliviatodd/Desktop/Postdoc/SAD_Development/Version_2/Photos/",
+    "json": "mloutput_SAD2_C5_9.7.23",
+    "filename_metadata": ["id", "timestamp"],
+    "workflow": "/Users/oliviatodd/Desktop/bioinform_tools/PlantCV_docs/SAD_paper/machine_learning_weightC5.py",
+    "img_outdir": "/Users/oliviatodd/Desktop/bioinform_tools/PlantCV_docs/SAD_paper/",
+    "include_all_subdirs": true,
+    "tmp_dir": null,
+    "start_date": null,
+    "end_date": null,
+    "imgformat": "jpg",
+    "delimiter": "-",
+    "metadata_filters": {},
+    "timestampformat": "%d",
+    "writeimg": false,
+    "other_args": null,
+    "coprocess": null,
+    "cleanup": true,
+    "append": true,
+    "cluster": "LocalCluster",
+    "cluster_config": {
+        "n_workers": 1,
+        "cores": 1,
+        "memory": "1GB",
+        "disk": "1GB",
+        "log_directory": null,
+        "local_directory": null,
+        "job_extra": null
+    },
+    "metadata_terms": {
+        "timestamp": {
+            "label": "datetime of image",
+            "datatype": "<class 'str'>",
+            "value": null
+    	},
+    	"id": {
+            "label": "image identifier",
+            "datatype": "<class 'str'>",
+            "value": "none"
+    	}
+    }
+}
