@@ -1,0 +1,427 @@
+---
+title: "Standard area diagram for rating Fusarium yellows in sugar beet (Beta vulgaris L.)"
+author: "Olivia E. Todd"
+description: This script will go through figure generation for Figure 4, panels B, C and D. Comparing the Naive Bayes models to the version 2 human estimates. 
+output: SAD_fusarium
+---
+## Note from the authors
+
+This script is a modified version of the script released with the paper entitled: "A New Standard Area Diagram of Soybean Rust Improves Accuracy of Visual Severity Estimates and Optimizes Resource Use" by Franceschi et al. 2020
+
+## Data import
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+
+setwd("~/Desktop/Postdoc/SAD_Development")
+dataframe1<- read_csv("baysianPQ.csv")
+dataframe2<-read_csv("alldata.csv")
+
+dataframe1
+dataframe2
+
+```
+### Density plots for figure 3B 
+
+```{r}
+#load in data for the version 1 and version 2 
+library(ggridges)
+p<- dataframe2 %>%
+  ggplot(aes(estimate - actual, method, fill = method)) +
+  geom_density_ridges(scale = 6, alpha = 0.9) +
+  theme_ridges() +
+  geom_vline(xintercept = 0) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values=c("coral2", "aquamarine"))
+
+p + labs(y = "SAD Version", x = "Disease Severity Error (Estimate - True)")
+
+```
+
+```{r}
+#save to wd
+ggsave(
+  filename = "Figure3B_Error_Density_plot.pdf",
+  plot = last_plot(),
+  device = NULL,
+  path = NULL,
+  scale = 1,
+  width = 6,
+  height = 3,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL,
+)
+```
+
+### Boxplot for Figure 4B
+
+```{r}
+
+dataframe1 %>%
+  ggplot(aes(method, estimate - actual, fill = method)) +
+  geom_boxplot() +
+  scale_fill_manual(values=c("#E69F00", "#8cbe48", "#90ccc6", "#07ccff" ,"purple", "#CC79A7")) +
+  labs(x = "Rating Method", y = "Disease Severity Error \n (Estimate - True)") 
+  
+#save the plot to wd
+ggsave(
+  filename = "Figure4B_boxplox.pdf",
+  plot = last_plot(),
+  device = NULL,
+  path = NULL,
+  scale = 1,
+  width = 6,
+  height = 3,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL,
+)
+  
+```
+
+## Generate figure 4C
+
+```{r}
+dataframe1 %>%
+  ggplot(aes(order_id, actual, colour = method)) +
+  geom_line(aes(order_id, actual, color = "actual"),size = 1.5) +
+  geom_point(aes(order_id, estimate, fill = method), size = 1.5, alpha = 0.2) + 
+  facet_wrap(~ method)+
+  #theme_few() +
+  theme(legend.position = "none") +
+  geom_ribbon(aes(ymin = actual - 10, ymax = actual + 10), fill = "grey90", alpha = 0.5) +
+  labs(y = "Estimated Severity Rating (%)", x = "Image ID \n (Numerically Ordered by Increasing Disease Severity)") +
+  coord_fixed(0.5)
+
+```
+```{r}
+ggsave(
+  filename = "error_estimate_plot.pdf",
+  plot = last_plot(),
+  device = NULL,
+  path = NULL,
+  scale = 1,
+  width = 6,
+  height = 3,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL,
+)
+
+```
+
+
+##Generate figure 4D, Error of the estimates. 
+
+```{r}
+dataframe1 %>%
+  ggplot(aes(order_id, estimate - actual, colour = method)) +
+  scale_colour_manual(values=c("#E69F00", "#8cbe48", "#90ccc6", "#07ccff" ,"purple", "#CC79A7")) + 
+  geom_hline(yintercept = 0) +
+  geom_point(aes(order_id, estimate - actual), size = 2, alpha = 0.1) +
+  geom_smooth(aes(order_id, estimate - actual), se = F) +
+  labs(y = "Disease Severity Error \n (Estimate - True)", x = "Image ID \n (Numerically Ordered by Increasing Disease Severity")
+  
+```
+# Save the plot
+```{r}
+ggsave(
+  filename = "Errorplot_combined.pdf",
+  plot = last_plot(),
+  device = NULL,
+  path = NULL,
+  scale = 1,
+  width = 6,
+  height = 3,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL,
+)
+```
+
+## Root mean square error to compare the computer models to the human estimates
+```{r}
+
+#subset the data to make an equation for RMSE
+#C2
+C2 <- subset(dataframe1, method=="C2",
+                  select=c(actual, estimate))
+C2
+rmse_C2<- sqrt(mean((C2$actual - C2$estimate)^2))
+rmse_C2
+
+#C5
+C5 <- subset(dataframe1, method=="C5",
+                  select=c(actual, estimate))
+C5
+rmse_C5<- sqrt(mean((C5$actual - C5$estimate)^2))
+rmse_C5
+
+#N2
+N2 <- subset(dataframe1, method=="N2",
+                  select=c(actual, estimate))
+N2
+rmse_N2<- sqrt(mean((N2$actual - N2$estimate)^2))
+rmse_N2
+
+#N2C2
+N2C2 <- subset(dataframe1, method=="N2C2",
+                  select=c(actual, estimate))
+N2C2
+rmse_N2C2<- sqrt(mean((N2C2$actual - N2C2$estimate)^2))
+rmse_N2C2
+
+#NoWeight
+NoWeight <- subset(dataframe1, method=="NoWeight",
+                  select=c(actual, estimate))
+rmse_NoWeight<- sqrt(mean((NoWeight$actual - NoWeight$estimate)^2))
+rmse_NoWeight
+
+#Human
+Human <- subset(dataframe1, method=="Human",
+                  select=c(actual, estimate))
+rmse_Human<- sqrt(mean((Human$actual - Human$estimate)^2))
+rmse_Human
+
+```
+
+```{r}
+
+## Combine into a table
+
+rmse_all <- rbind(rmse_N2, rmse_N2C2, rmse_C2, rmse_C5, rmse_NoWeight, rmse_Human)
+
+rmse_all
+
+```
+
+################### Lin's concordance #######################
+##LCC between the version 1 and version 2 SADs
+
+### Generate LCC parameters for Version 1
+
+```{r}
+library(epiR)
+
+sad_version1 <- dataframe2 %>%
+  group_by(rater) %>%
+  filter(method == "Version_1")
+ccc_version1 <- by(sad_version1, sad_version1$rater, function(sad_version1)
+  epi.ccc(sad_version1$actual, sad_version1$estimate,  ci = "z-transform", conf.level = 0.95))
+
+```
+
+```{r}
+version1_pc <- ccc_version1 %>%
+  map_df("rho.c") %>%
+  mutate(rater = 1:12) %>%
+  mutate(rater = as.character(rater)) %>%
+  dplyr::select(4, 1)
+
+version1_Cb <- ccc_version1 %>%
+  map_df("C.b") %>%
+  gather(rater, Cb)
+
+version1_l.shift <- ccc_version1 %>%
+  map_df("l.shift") %>%
+  gather(rater, l.shift)
+
+version1_s.shift <- ccc_version1 %>%
+  map_df("s.shift") %>%
+  gather(rater, s.shift)
+
+version1_ccc <- left_join(version1_l.shift, version1_s.shift, by = "rater") %>%
+  left_join(., version1_Cb, by = "rater") %>%
+  left_join(., version1_pc, by = "rater") %>%
+  mutate(r = est * Cb) %>%
+  mutate(rater = as.numeric(rater)) %>%
+  mutate(method = "Version_1")
+```
+
+### Generate LCC parameters for Version 2
+
+```{r}
+sad_version2 <- dataframe2 %>%
+  group_by(rater) %>%
+  filter(method == "Version_2")
+ccc_version2 <- by(sad_version2, sad_version2$rater, function(sad_version2)
+  epi.ccc(sad_version2$actual, sad_version2$estimate,  ci = "z-transform", conf.level = 0.95))
+```
+
+```{r}
+version2_pc <- ccc_version2 %>%
+  map_df("rho.c") %>%
+  mutate(rater = 1:17) %>%
+  mutate(rater = as.character(rater)) %>%
+  dplyr::select(4, 1)
+
+version2_Cb <- ccc_version2 %>%
+  map_df("C.b") %>%
+  gather(rater, Cb)
+
+version2_l.shift <- ccc_version2 %>%
+  map_df("l.shift") %>%
+  gather(rater, l.shift)
+
+version2_s.shift <- ccc_version2 %>%
+  map_df("s.shift") %>%
+  gather(rater, s.shift)
+
+version2_ccc <- left_join(version2_l.shift, version2_s.shift, by = "rater") %>%
+  left_join(., version2_Cb, by = "rater") %>%
+  left_join(., version2_pc, by = "rater") %>%
+  mutate(r = est * Cb) %>%
+  mutate(rater = as.numeric(rater)) %>%
+  mutate(method = "Version_2")
+```
+
+
+
+Combine all estimates in a single dataframe and reshape to long format
+
+```{r}
+ccc_all <- rbind(version1_ccc, version2_ccc)
+ccc <- ccc_all %>%
+  gather(stat, coef, 2:6) %>% 
+  unite(rater_method, rater, method, remove = FALSE) %>% 
+  separate(method, c("sad"), remove=FALSE)
+
+```
+
+#### Visualize LCCC statistics
+
+##Lin's concordance coefficient - Figure 3A and C were generated using GraphPad Prism
+
+```{r}
+pc <- ccc %>%
+  filter(stat == "est") %>%
+  ggplot(aes(method, coef, fill = method)) +
+  geom_boxplot() +
+  labs(y = "LCC")+
+  ylim(0.80,1)
+  #geom_jitter()
+pc
+```
+
+
+## Bias coefficient
+```{r}
+Cb <- ccc %>%
+  filter(stat == "Cb") %>%
+ ggplot(aes(method, coef, fill = method)) +
+  geom_boxplot() +
+  labs(y = "Cb")
+Cb
+```
+
+
+##Pearson's R
+
+```{r}
+r <- ccc %>%
+  filter(stat == "r") %>%
+ ggplot(aes(method, coef, fill = method)) +
+  geom_boxplot() +
+  labs(y = "Pearson's r")
+r
+```
+
+
+## Linear mixed model
+
+We will estimate the means and compare them using `emmeans` package.
+
+### Reshape data to wide 
+
+```{r}
+
+ccc2 <- ccc %>%
+  filter(stat != "ccc.lower") %>%
+  filter(stat != "ccc.upper") %>%
+  spread(stat, coef) 
+```
+
+### Concordance coefficient
+```{r}
+# pc
+library(multcomp)
+library(multcompView)
+library(lsmeans)
+library(lme4)
+library(pbkrtest)
+library(lmerTest)
+ccc2$rater<-as.factor(ccc2$rater)
+
+mix_pc <- lmer(est ~ method + (1 | rater), data = ccc2, REML = FALSE)
+mean_pc <- lsmeans(mix_pc, ~method)
+df_pc <- cld(mean_pc)
+df_pc
+```
+
+### Correlation coefficient
+
+```{r }
+# r
+mix_r <- lmer(r ~ method + (1 | rater), data = ccc2, REML = FALSE)
+
+mean_r <- lsmeans(mix_r, ~ method)
+df_r <- cld(mean_r)
+df_r
+
+```
+
+
+### Bias coefficient
+
+```{r }
+
+
+# cb
+mix_cb <- lmer(Cb ~ method + (1 | rater), data = ccc2, REML = FALSE)
+
+mean_cb <- lsmeans(mix_cb, ~ method)
+df_cb <- cld(mean_cb)
+df_cb
+```
+
+
+### location-shift
+
+```{r}
+# ls
+mix_ls <- lmer(l.shift ~ method + (1 | rater), data = ccc2, REML = FALSE)
+mean_ls <- lsmeans(mix_ls, ~ method)
+df_ls <- cld(mean_ls)
+
+df_ls
+```
+
+
+### scale-shift
+
+```{r }
+# ss
+mix_ss <- lmer(s.shift ~ method + (1  | rater), data = ccc2, REML = FALSE)
+mean_ss <- lsmeans(mix_ss, ~ method)
+df_ss <- cld(mean_ss)
+
+df_ss
+
+```
+
+
+### Combine in a table
+
+```{r }
+
+df_all <- rbind(df_pc, df_r, df_cb, df_ss, df_ls) %>%
+  mutate(lsmean = round(as.numeric(lsmean), 2))
+
+df_all
+```
+
