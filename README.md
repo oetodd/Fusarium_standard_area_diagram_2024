@@ -17,13 +17,13 @@ Code/Input files
 
 		input data: 
 
-		<alldata1.csv> is the file that contains version 1 rating data and version 2 rating data.
+		<alldata2.csv> is the file that contains version 1 rating data and version 2 rating data.
 
 		<baysianPQ.csv> is the data that renames version 2 ratings as "human" and includes ratings from 5 machine learning models.
 
 		code:
 
-		<Fus_SAD_R.Rmd> R markdown script detailing the statistical analysis and figure generation.
+		<SAD_publish.Rmd> R markdown script detailing the statistical analysis and figure generation.
 
 PlantCV:
 
